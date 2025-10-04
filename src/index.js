@@ -4,6 +4,8 @@ const form = document.querySelector('#search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreBtn = document.querySelector('.load-more');
 
+
+
 // 	Your API key: 52609803-933344cf37d0c6144f6fe0bf2
 
 // Список параметрів рядка запиту, які тобі обов'язково
