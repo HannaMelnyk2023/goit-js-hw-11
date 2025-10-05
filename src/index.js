@@ -4,9 +4,33 @@ const form = document.querySelector('#search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreBtn = document.querySelector('.load-more');
 
-
-
 // 	Your API key: 52609803-933344cf37d0c6144f6fe0bf2
+const API_KEY = '52609803-933344cf37d0c6144f6fe0bf2';
+const BASE_URL = 'https://pixabay.com/api/';
+
+let searchQuery = "";
+let page = 1;
+const perPage = 40;
+
+loadMoreBtn.computedStyleMap.display = "none";
+
+form.addEventListener('submit', onSearch);
+loadMoreBtn.addEventListener('click', onLoadMore);
+
+async function onSearch(evt) {
+    eval.preventDefault();
+    searchQuery = evt.currentTarget.element.searchQuery.value.trim();
+    if (searchQuery === '') {
+        Notiflix.Notify.warning('Please enter a search term');
+        return;
+    }
+
+    page = 1;
+    gallery.innerHTML = '';
+    loadMoreBtn.style.display = 'none';
+
+    await fetchImages();
+}
 
 // Список параметрів рядка запиту, які тобі обов'язково
 // необхідно вказати:
