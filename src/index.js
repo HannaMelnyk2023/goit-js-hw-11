@@ -12,7 +12,7 @@ let searchQuery = '';
 let page = 1;
 const perPage = 40;
 
-loadMoreBtn.computedStyleMap.display = 'none';
+loadMoreBtn.style.display = 'none';
 
 form.addEventListener('submit', onSearch);
 loadMoreBtn.addEventListener('click', onLoadMore);
