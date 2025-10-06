@@ -8,18 +8,18 @@ const loadMoreBtn = document.querySelector('.load-more');
 const API_KEY = '52609803-933344cf37d0c6144f6fe0bf2';
 const BASE_URL = 'https://pixabay.com/api/';
 
-let searchQuery = "";
+let searchQuery = '';
 let page = 1;
 const perPage = 40;
 
-loadMoreBtn.computedStyleMap.display = "none";
+loadMoreBtn.computedStyleMap.display = 'none';
 
 form.addEventListener('submit', onSearch);
 loadMoreBtn.addEventListener('click', onLoadMore);
 
 async function onSearch(evt) {
-    eval.preventDefault();
-    searchQuery = evt.currentTarget.element.searchQuery.value.trim();
+    evt.preventDefault();
+    searchQuery = evt.currentTarget.elements.searchQuery.value.trim('');
     if (searchQuery === '') {
         Notiflix.Notify.warning('Please enter a search term');
         return;
@@ -32,26 +32,83 @@ async function onSearch(evt) {
     await fetchImages();
 }
 
-// Список параметрів рядка запиту, які тобі обов'язково
-// необхідно вказати:
+async function onLoadMore() {
+    page += 1;
+    await fetchImages();
+}
+// https://pixabay.com/api/?key=52609803-933344cf37d0c6144f6fe0bf2&q=cat&image_type=photo&orientation=horizontal&safesearch=true
+async function fetchImages() {
+    try {
+        const response = await fetch(
+            `${BASE_URL}?key=${API_KEY}&q=${searchQuery}&image_type=photo&orientation=horizontal&safesearch=true&page=${page}&per_page=${perPage}`
+        );
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
 
-// key - твій унікальний ключ доступу до API.
-// q - термін для пошуку.Те, що буде вводити користувач.
-// image_type - тип зображення.На потрібні тільки фотографії, тому постав значення photo.
-// orientation - орієнтація фотографії.Постав значення horizontal.
-// safesearch - фільтр за віком.Постав значення true.
-// У відповіді буде масив зображень, що задовольнили критерії параметрів запиту.
-// Кожне зображення описується об'єктом, з якого тобі цікаві тільки наступні властивості:
+        // "Sorry, there are no images matching your search query. Please try again."
 
-// webformatURL - посилання на маленьке зображення для списку карток.
-// largeImageURL - посилання на велике зображення.
-// tags - рядок з описом зображення.Підійде для атрибуту alt.
-// likes - кількість лайків.
-// views - кількість переглядів.
-// comments - кількість коментарів.
-// downloads - кількість завантажень.
-// Якщо бекенд повертає порожній масив, значить нічого підходящого
-// не було знайдено.У такому разі показуй повідомлення з
-// текстом "Sorry, there are no images matching your search
-// query. Please try again.".Для повідомлень використовуй
-// бібліотеку notiflix.
+        const data = await response.json();
+        const hits = data.hits;
+        const totalHits = data.totalHits;
+
+        if (hits.length === 0 && page === 1) {
+            Notiflix.Notify.failure(
+                'Sorry, there are no images matching your search query. Please try again.'
+            );
+            return;
+        }
+        renderGallery(hits);
+        // кнопку показує, якщо є response
+        if (page * perPage < totalHits) {
+            loadMoreBtn.style.display = 'block';
+        } else {
+            loadMoreBtn.style.display = 'none';
+            if (page !== 1) {
+                Notiflix.Notify.info(
+                    "We're sorry, but you've reached the end of search results."
+                );
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        Notiflix.Notify.failure('Something went wrong. Please, try again late.');
+    }
+}
+function renderGallery(images) {
+    const markup = images
+        .map(
+            ({
+                webformatURL,
+                largeImageURL,
+                tags,
+                likes,
+                views,
+                comments,
+                downloads,
+            }) =>
+                `<div class="photo-card">
+            <a href="${largeImageURL}" target = "_blank" rel = "noopener noreferrer">
+           
+  <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+  </a>
+  <div class="info">
+    <p class="info-item">
+      <b>Likes</b>${likes}
+    </p>
+    <p class="info-item">
+      <b>Views</b>${views}
+    </p>
+    <p class="info-item">
+      <b>Comments</b>${comments}
+    </p>
+    <p class="info-item">
+      <b>Downloads</b>${downloads}
+    </p>
+  </div>
+</div>`
+        )
+        .join('');
+    gallery.insertAdjacentHTML('beforeend', markup);
+}
+
