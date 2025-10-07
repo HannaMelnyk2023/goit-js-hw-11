@@ -1,4 +1,6 @@
 import Notiflix from 'notiflix';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const form = document.querySelector('#search-form');
 const gallery = document.querySelector('.gallery');
@@ -58,8 +60,11 @@ async function fetchImages() {
             );
             return;
         }
+        if (page === 1) {
+            Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
+        }
         renderGallery(hits);
-        // кнопку показує, якщо є response
+        // кнопка показується, якщо є response
         if (page * perPage < totalHits) {
             loadMoreBtn.style.display = 'block';
         } else {
@@ -75,6 +80,11 @@ async function fetchImages() {
         Notiflix.Notify.failure('Something went wrong. Please, try again late.');
     }
 }
+
+let lightbox = new SimpleLightbox('.gallery a', {
+    captionsData: 'alt',
+    captionDelay: 250,
+});
 function renderGallery(images) {
     const markup = images
         .map(
@@ -88,8 +98,7 @@ function renderGallery(images) {
                 downloads,
             }) =>
                 `<div class="photo-card">
-            <a href="${largeImageURL}" target = "_blank" rel = "noopener noreferrer">
-           
+            <a href="${largeImageURL}" rel = "noopener noreferrer">       
   <img src="${webformatURL}" alt="${tags}" loading="lazy" />
   </a>
   <div class="info">
@@ -110,5 +119,5 @@ function renderGallery(images) {
         )
         .join('');
     gallery.insertAdjacentHTML('beforeend', markup);
+    lightbox.refresh();
 }
-
