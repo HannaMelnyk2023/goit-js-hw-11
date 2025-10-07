@@ -5,6 +5,7 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const form = document.querySelector('#search-form');
 const gallery = document.querySelector('.gallery');
 const loadMoreBtn = document.querySelector('.load-more');
+let lightbox;
 
 // 	Your API key: 52609803-933344cf37d0c6144f6fe0bf2
 const API_KEY = '52609803-933344cf37d0c6144f6fe0bf2';
@@ -81,10 +82,6 @@ async function fetchImages() {
     }
 }
 
-let lightbox = new SimpleLightbox('.gallery a', {
-    captionsData: 'alt',
-    captionDelay: 250,
-});
 function renderGallery(images) {
     const markup = images
         .map(
@@ -119,5 +116,13 @@ function renderGallery(images) {
         )
         .join('');
     gallery.insertAdjacentHTML('beforeend', markup);
-    lightbox.refresh();
+
+    if (!lightbox) {
+        lightbox = new SimpleLightbox('.gallery a', {
+            captionsData: 'alt',
+            captionDelay: 250,
+        });
+    } else {
+        lightbox.refresh();
+    }
 }
